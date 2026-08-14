@@ -1,18 +1,30 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
+from datetime import datetime
 
-app = FastAPI()
+app = FastAPI(
+    title="HRV Backend API",
+    description="接收 Android 心率資料並進行後續 HRV 分析",
+    version="1.0.0"
+)
 
 
-# Android 傳過來的資料格式
+# =========================
+# Android 傳送資料的格式
+# =========================
+
 class HeartRateData(BaseModel):
     device_id: str
     timestamp: int
     heart_rate: List[float]
+    rr_intervals: List[float] = []
 
 
-# 測試 Backend 是否正常
+# =========================
+# 測試 Backend
+# =========================
+
 @app.get("/")
 def root():
     return {
@@ -21,16 +33,25 @@ def root():
     }
 
 
+# =========================
 # 接收 Android 心率資料
+# =========================
+
 @app.post("/heart-rate")
 def receive_heart_rate(data: HeartRateData):
 
-    print("收到裝置：", data.device_id)
-    print("收到時間：", data.timestamp)
-    print("收到心率：", data.heart_rate)
+    print("\n========== 收到心率資料 ==========")
+    print("Device ID:", data.device_id)
+    print("Timestamp:", data.timestamp)
+    print("Heart Rate:", data.heart_rate)
+    print("RR Intervals:", data.rr_intervals)
+    print("資料筆數:", len(data.heart_rate))
+    print("=================================\n")
 
     return {
         "status": "success",
         "device_id": data.device_id,
-        "received_samples": len(data.heart_rate)
+        "received_hr_samples": len(data.heart_rate),
+        "received_rr_samples": len(data.rr_intervals),
+        "message": "Heart rate data received successfully"
     }
