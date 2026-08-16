@@ -6,7 +6,7 @@ import pandas as pd
 st.title("❤️ 區域網路即時心率監測儀")
 
 # 🔗 連接本機 FastAPI 的網址 (因為都在同一台電腦，打 127.0.0.1 即可)
-FASTAPI_URL = "192.168.0.46:8000/docs"
+FASTAPI_URL = "http://192.168.0.46"
 
 # 初始化 Streamlit 的歷史紀錄儲存器（避免重刷網頁時不見）
 if "hr_history" not in st.session_state:
