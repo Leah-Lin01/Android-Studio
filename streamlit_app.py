@@ -1,104 +1,52 @@
 import streamlit as st
+import requests
+import time
+import pandas as pd
 
-from hrv_analysis import (
-    calculate_basic_hrv,
-    calculate_frequency_domain
-)
+# 設定網頁標題
+st.title("❤️ 即時心率監測儀表板")
 
+# Firebase 的資料網址（結尾一樣要加 .json）
+FIREBASE_URL = "https://firebaseio.com"
 
-st.set_page_config(
-    page_title="HRV Analysis",
-    page_icon="❤️"
-)
+# 用來放歷史數據的容器
+if "history" not in st.session_state:
+    st.session_state.history = []
 
-st.title("❤️ HRV 心率變異分析系統")
+# 建立畫面的區塊
+metric_slot = st.empty()
+chart_slot = st.empty()
 
-st.write(
-    "輸入 RR Interval 資料，進行 HRV 與頻域分析。"
-)
-
-
-# =========================
-# 輸入資料
-# =========================
-
-rr_text = st.text_area(
-    "請輸入 RR Interval（ms），以逗號分隔",
-    placeholder="833, 822, 800, 811, 845, 830"
-)
-
-
-if st.button("開始分析", type="primary"):
-
+# 無限循環，每秒去抓一次新資料
+while True:
     try:
-
-        rr_intervals = [
-            float(x.strip())
-            for x in rr_text.split(",")
-            if x.strip()
-        ]
-
-        if len(rr_intervals) < 10:
-            st.warning(
-                "RR Interval 資料太少，至少需要 10 筆以上。"
-            )
-
-        else:
-
-            # 基本 HRV
-            basic_result = calculate_basic_hrv(
-                rr_intervals
-            )
-
-            # 頻域分析
-            frequency_result = calculate_frequency_domain(
-                rr_intervals
-            )
-
-            # =========================
-            # 顯示結果
-            # =========================
-
-            st.subheader("基本 HRV")
-
-            col1, col2, col3 = st.columns(3)
-
-            col1.metric(
-                "平均心率",
-                f"{basic_result['mean_hr']:.1f} BPM"
-            )
-
-            col2.metric(
-                "SDNN",
-                f"{basic_result['sdnn']:.2f} ms"
-            )
-
-            col3.metric(
-                "RMSSD",
-                f"{basic_result['rmssd']:.2f} ms"
-            )
-
-            st.subheader("頻域分析")
-
-            col1, col2, col3 = st.columns(3)
-
-            col1.metric(
-                "LF",
-                f"{frequency_result['LF']:.2f}"
-            )
-
-            col2.metric(
-                "HF",
-                f"{frequency_result['HF']:.2f}"
-            )
-
-            col3.metric(
-                "LF/HF",
-                f"{frequency_result['LF_HF']:.2f}"
-            )
-
+        # 向 Firebase 要資料
+        response = requests.get(FIREBASE_URL)
+        data = response.json()
+        
+        if data:
+            bpm = data.get("bpm", 0)
+            timestamp = data.get("timestamp", 0)
+            
+            # 顯示目前的大數字心率
+            with metric_slot.container():
+                st.metric(label="目前心率 (BPM)", value=f"{bpm} 次/分")
+            
+            # 將歷史資料存起來畫圖
+            # 避免重複塞入同一秒的數據
+            if not st.session_state.history or st.session_state.history[-1]["time"] != timestamp:
+                st.session_state.history.append({"time": timestamp, "bpm": bpm})
+                # 只保留最近 20 筆資料
+                if len(st.session_state.history) > 20:
+                    st.session_state.history.pop(0)
+            
+            # 繪製即時折線圖
+            df = pd.DataFrame(st.session_state.history)
+            with chart_slot.container():
+                st.line_chart(df.set_index("time")["bpm"])
+                
     except Exception as e:
-
-        st.error(
-            f"分析失敗：{e}"
-        )
+        st.error(f"讀取資料失敗: {e}")
+        
+    # 每 1 秒刷新一次
+    time.sleep(1)
