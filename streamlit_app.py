@@ -31,7 +31,7 @@ try:
         error_box.empty()  # 連線成功，清空錯誤
         
         # 撈出心率數值
-        current_bpm = res_json.get("heart_rate", 90)
+        current_bpm = res_json.get("heart_rate", 0)
         
         # 渲染大字級心率
         with metric_box.container():
