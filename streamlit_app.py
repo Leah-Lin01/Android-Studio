@@ -7,7 +7,7 @@ import pandas as pd
 st.title("❤️ 即時心率監測儀表板")
 
 # Firebase 的資料網址（結尾一樣要加 .json）
-FIREBASE_URL = "https://firebaseio.com"
+FIREBASE_URL = "http://192.168.1.105:8000/heart_rate"
 
 # 用來放歷史數據的容器
 if "history" not in st.session_state:
