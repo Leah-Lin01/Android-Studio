@@ -6,7 +6,7 @@ import pandas as pd
 st.title("❤️ 區域網路即時心率監測儀")
 
 # 🔗 確保精準對準 FastAPI 的 /heart_rate
-FASTAPI_URL = "http://127.0.0"
+FASTAPI_URL = "http://127.0.0.1:8000"
 
 # 🔄 核心修正：使用 Streamlit 官方計時器，每 1000 毫秒 (1秒) 自動重刷網頁
 # 這樣可以完美取代卡死網頁的 while True，讓畫面每秒動態刷新！
