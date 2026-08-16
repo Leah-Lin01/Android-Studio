@@ -16,7 +16,7 @@ def root():
     return {"message": "FastAPI is running"}
 
 
-@app.post("http://192.168.0.46")
+@app.get("/get_latest")
 def receive_heart_rate(data: HeartRateData):
     global latest_data
 
@@ -33,6 +33,6 @@ def receive_heart_rate(data: HeartRateData):
     }
 
 
-@app.get("http://192.168.0.46")
+@app.get("/get_latest")
 def get_heart_rate():
     return latest_data
