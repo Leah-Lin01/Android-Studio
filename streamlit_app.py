@@ -13,7 +13,7 @@ hr_metric = st.empty()
 while True:
     try:
         # 讀取本機 FastAPI 的暫存資料
-        response = requests.get("http://127.0.0.46", timeout=1)
+        response = requests.get("http://127.0.0.46:8000", timeout=1)
         if response.status_code == 200:
             data = response.json()
             
