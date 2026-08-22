@@ -25,4 +25,4 @@ while True:
     except Exception as e:
         st.error(f"無法讀取後端數據: {e}")
         
-    time.sleep(0.1) # 每 0.1 秒刷新一次網頁數據
+    time.sleep(5) # 每 0.1 秒刷新一次網頁數據
